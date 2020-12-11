@@ -1,5 +1,5 @@
 from aiogram import executor
-from misc import dp
+from launch import dp
 import handlers
 
 if __name__ == '__main__':
