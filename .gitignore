@@ -3,3 +3,4 @@
 __pycache__/
 handlers/__pycache__/
 .env
+database/party.db
