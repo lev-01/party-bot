@@ -2,6 +2,7 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from launch import dp
+from database import db
 from texts import AVAILABLE_FOOD_CATEGORIES, HELP_TEXT_FOOD, CHECK_TEXT, AVAILABLE_FOOD_MEASUREMENT_UNITS, FINAL_TEXT
 import re
 
@@ -26,6 +27,10 @@ async def food_step_1(message: types.Message):
 # step 2
 @dp.message_handler(state=OrderFood.waiting_for_food_category, content_types=types.ContentTypes.TEXT)
 async def food_step_2(message: types.Message, state: FSMContext):
+    if message.text.lower() == '/list':
+        await message.answer('Сначала закончи вносить пожелание, потом посмотришь список.')
+        await OrderFood.waiting_for_food_category.set()
+        return
     category = message.text.lower()
     if category not in AVAILABLE_FOOD_CATEGORIES:
         await message.reply('Пожалуйста, не неси херню, используй клавиатуру ниже')
@@ -34,22 +39,17 @@ async def food_step_2(message: types.Message, state: FSMContext):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     for name in sorted(AVAILABLE_FOOD_CATEGORIES.get(category)):
         keyboard.add(name)
-    if category == 'мясо':
-        await message.answer('Уточни, какое мясо ты хочешь', reply_markup=keyboard)
-    elif category == 'рыба':
-        await message.answer('Уточни, какую рыбу ты хочешь', reply_markup=keyboard)
-    elif category == 'молочка':
-        await message.answer('Уточни, какую молочку ты хочешь', reply_markup=keyboard)
-    elif category == 'овощи':
-        await message.answer('Уточни, какие овощи ты хочешь', reply_markup=keyboard)
-    elif category == 'фрукты':
-        await message.answer('Уточни, какие фрукты ты хочешь', reply_markup=keyboard)
+    await message.answer('Уточни, что именно ты хочешь', reply_markup=keyboard)
     await OrderFood.waiting_for_food_name.set()
 
 
 # step 3
 @dp.message_handler(state=OrderFood.waiting_for_food_name, content_types=types.ContentTypes.TEXT)
 async def food_step_3(message: types.Message, state: FSMContext):
+    if message.text.lower() == '/list':
+        await message.answer('Сначала закончи вносить пожелание, потом посмотришь список.')
+        await OrderFood.waiting_for_food_name.set()
+        return
     current_data = await state.get_data()
     category = current_data['chosen_food_category']
     name = message.text.lower()
@@ -64,6 +64,10 @@ async def food_step_3(message: types.Message, state: FSMContext):
 # step 4
 @dp.message_handler(state=OrderFood.waiting_for_other, content_types=types.ContentTypes.TEXT)
 async def food_step_4(message: types.Message, state=FSMContext):
+    if message.text.lower() == '/list':
+        await message.answer('Сначала закончи вносить пожелание, потом посмотришь список.')
+        await OrderFood.waiting_for_other.set()
+        return
     if not message.text.lower() == '/skip':
         await state.update_data(other=message.text.lower())
     await message.answer('Укажи количество')
@@ -73,11 +77,19 @@ async def food_step_4(message: types.Message, state=FSMContext):
 # step 5
 @dp.message_handler(state=OrderFood.waiting_for_amount, content_types=types.ContentTypes.TEXT)
 async def food_step_5(message: types.Message, state=FSMContext):
+    if message.text.lower() == '/list':
+        await message.answer('Сначала закончи вносить пожелание, потом посмотришь список.')
+        await OrderFood.waiting_for_amount.set()
+        return
     for unit in AVAILABLE_FOOD_MEASUREMENT_UNITS:
         if re.search(unit, message.text.lower()):
             break
     else:
         await message.answer(CHECK_TEXT)
+        await OrderFood.waiting_for_amount.set()
+        return
     await state.update_data(amount=message.text.lower(), name=message.from_user.full_name)
+    user_data = await state.get_data()
+    await db.touch(user_data)
     await message.answer(FINAL_TEXT)
     await state.finish()
