@@ -1,3 +1,10 @@
 import os
+from configparser import ConfigParser
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
+POSTGRES_DB = os.getenv('POSTGRES_DB')
+POSTGRES_USER_LOCAL = os.getenv('POSTGRES_USER_LOCAL')
+POSTGRES_PASSWORD_LOCAL = os.getenv('POSTGRES_PASSWORD_LOCAL')
+POSTGRES_HOST_LOCAL = os.getenv('POSTGRES_HOST_LOCAL')
+POSTGRES_PORT_LOCAL = os.getenv('POSTGRES_PORT_LOCAL')
+CONN_STRING = os.getenv('CONN_STRING')
