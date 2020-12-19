@@ -4,7 +4,8 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from launch import dp
 from texts import AVAILABLE_ALCOHOL_CATEGORIES, CHECK_TEXT, HELP_TEXT_ALCOHOL, AVAILABLE_ALCOHOL_MEASUREMENT_UNITS, \
     FINAL_TEXT
-from database import session, Alcohol
+from database import session, Alcohol, User
+from general import check_if_user_exists
 import re
 
 
@@ -17,6 +18,7 @@ class OrderAlcohol(StatesGroup):
 # step 1
 @dp.message_handler(commands='alcohol', state='*')
 async def alco_step_1(message: types.Message):
+    check_if_user_exists(message)
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     for category in sorted(AVAILABLE_ALCOHOL_CATEGORIES):
         keyboard.add(category)
@@ -27,6 +29,7 @@ async def alco_step_1(message: types.Message):
 # step 2
 @dp.message_handler(state=OrderAlcohol.waiting_for_alcohol_category, content_types=types.ContentType.TEXT)
 async def alco_step_2(message: types.Message, state: FSMContext):
+    check_if_user_exists(message)
     if message.text.lower() == '/list':
         await message.answer('Сначала закончи вносить пожелание, потом посмотришь список.')
         await OrderAlcohol.waiting_for_alcohol_category.set()
@@ -43,6 +46,7 @@ async def alco_step_2(message: types.Message, state: FSMContext):
 # step 3
 @dp.message_handler(state=OrderAlcohol.waiting_for_other, content_types=types.ContentType.TEXT)
 async def alco_step_3(message: types.Message, state: FSMContext):
+    check_if_user_exists(message)
     if message.text.lower() in ('/list', '/food'):
         await message.answer('Сначала закончи вносить пожелание, потом сможешь посмотреть список или внести новое пожелание.')
         await OrderAlcohol.waiting_for_other.set()
@@ -65,6 +69,7 @@ async def alco_step_3(message: types.Message, state: FSMContext):
 # step 4
 @dp.message_handler(state=OrderAlcohol.waiting_for_amount, content_types=types.ContentType.TEXT)
 async def alco_step_4(message: types.Message, state: FSMContext):
+    check_if_user_exists(message)
     if message.text.lower() == '/list':
         await message.answer('Сначала закончи вносить пожелание, потом посмотришь список.')
         await OrderAlcohol.waiting_for_amount.set()

@@ -6,22 +6,25 @@ from database import session, User, Food, Alcohol
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import func
 
-
-@dp.message_handler(commands='start')
-async def cmd_start(message: types.Message):
-    await message.answer(START_TEXT)
-    user = User(id=message.from_user.id,
-                name=message.from_user.full_name)
+def check_if_user_exists(message: types.Message):
     try:
         session.query(User).filter(User.id == message.from_user.id, User.name == message.from_user.full_name).one()
     except NoResultFound:
         session.add(user)
         session.commit()
 
+@dp.message_handler(commands='start')
+async def cmd_start(message: types.Message):
+    await message.answer(START_TEXT)
+    user = User(id=message.from_user.id,
+                name=message.from_user.full_name)
+    print(user.id, user.name)
+    check_if_user_exists(message)
 
 # step 1
 @dp.message_handler(commands='list', state='*')
 async def show_list(message: types.Message, state: FSMContext):
+    check_if_user_exists(message)
     query = '''
         with t as (
         select "user".id user_id, food.id native_id, food.chosen_food choice, food.amount, food.other
@@ -66,6 +69,7 @@ async def show_list(message: types.Message, state: FSMContext):
 # step 2
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=[r'del(\d)+']))
 async def delete_item(message: types.Message, state: FSMContext):
+    check_if_user_exists(message)
     user_data = await state.get_data()
     try:
         session.query(Alcohol).filter(Alcohol.user_id == message.from_user.id,

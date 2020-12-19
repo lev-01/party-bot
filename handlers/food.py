@@ -2,8 +2,9 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from launch import dp
-from database import session, Food
+from database import session, Food, User
 from texts import AVAILABLE_FOOD_CATEGORIES, HELP_TEXT_FOOD, CHECK_TEXT, AVAILABLE_FOOD_MEASUREMENT_UNITS, FINAL_TEXT
+from general import check_if_user_exists
 import re
 
 
@@ -17,6 +18,7 @@ class OrderFood(StatesGroup):
 # step 1
 @dp.message_handler(commands='food', state='*')
 async def food_step_1(message: types.Message):
+    check_if_user_exists(message)
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     for category in sorted(AVAILABLE_FOOD_CATEGORIES):
         keyboard.add(category)
@@ -27,6 +29,7 @@ async def food_step_1(message: types.Message):
 # step 2
 @dp.message_handler(state=OrderFood.waiting_for_food_category, content_types=types.ContentTypes.TEXT)
 async def food_step_2(message: types.Message, state: FSMContext):
+    check_if_user_exists(message)
     if message.text.lower() == '/list':
         await message.answer('Сначала закончи вносить пожелание, потом посмотришь список.')
         await OrderFood.waiting_for_food_category.set()
@@ -46,6 +49,7 @@ async def food_step_2(message: types.Message, state: FSMContext):
 # step 3
 @dp.message_handler(state=OrderFood.waiting_for_food_name, content_types=types.ContentTypes.TEXT)
 async def food_step_3(message: types.Message, state: FSMContext):
+    check_if_user_exists(message)
     if message.text.lower() == '/list':
         await message.answer('Сначала закончи вносить пожелание, потом посмотришь список.')
         await OrderFood.waiting_for_food_name.set()
@@ -64,6 +68,7 @@ async def food_step_3(message: types.Message, state: FSMContext):
 # step 4
 @dp.message_handler(state=OrderFood.waiting_for_other, content_types=types.ContentTypes.TEXT)
 async def food_step_4(message: types.Message, state=FSMContext):
+    check_if_user_exists(message)
     if message.text.lower() in ('/list', '/alcohol'):
         await message.answer('Сначала закончи вносить пожелание, потом сможешь посмотреть список или внести новое пожелание.')
         await OrderFood.waiting_for_other.set()
@@ -86,6 +91,7 @@ async def food_step_4(message: types.Message, state=FSMContext):
 # step 5
 @dp.message_handler(state=OrderFood.waiting_for_amount, content_types=types.ContentTypes.TEXT)
 async def food_step_5(message: types.Message, state=FSMContext):
+    check_if_user_exists(message)
     if message.text.lower() == '/list':
         await message.answer('Сначала закончи вносить пожелание, потом посмотришь список.')
         await OrderFood.waiting_for_amount.set()
