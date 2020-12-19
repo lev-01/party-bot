@@ -6,12 +6,15 @@ from database import session, User, Food, Alcohol
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import func
 
+
 def check_if_user_exists(message: types.Message):
     try:
         session.query(User).filter(User.id == message.from_user.id, User.name == message.from_user.full_name).one()
     except NoResultFound:
+        user = User(id=message.from_user.id, name=message.from_user.full_name)
         session.add(user)
         session.commit()
+
 
 @dp.message_handler(commands='start')
 async def cmd_start(message: types.Message):
@@ -20,6 +23,7 @@ async def cmd_start(message: types.Message):
                 name=message.from_user.full_name)
     print(user.id, user.name)
     check_if_user_exists(message)
+
 
 # step 1
 @dp.message_handler(commands='list', state='*')

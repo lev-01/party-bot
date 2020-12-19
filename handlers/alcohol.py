@@ -5,7 +5,7 @@ from launch import dp
 from texts import AVAILABLE_ALCOHOL_CATEGORIES, CHECK_TEXT, HELP_TEXT_ALCOHOL, AVAILABLE_ALCOHOL_MEASUREMENT_UNITS, \
     FINAL_TEXT
 from database import session, Alcohol, User
-from general import check_if_user_exists
+from .general import check_if_user_exists
 import re
 
 

@@ -4,7 +4,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from launch import dp
 from database import session, Food, User
 from texts import AVAILABLE_FOOD_CATEGORIES, HELP_TEXT_FOOD, CHECK_TEXT, AVAILABLE_FOOD_MEASUREMENT_UNITS, FINAL_TEXT
-from general import check_if_user_exists
+from .general import check_if_user_exists
 import re
 
 
