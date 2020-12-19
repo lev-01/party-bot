@@ -5,6 +5,11 @@ name = "pypi"
 
 [packages]
 aiogram = "*"
+psycopg2 = "*"
+sqlalchemy = "*"
+python-dotenv = "*"
+sqlalchemy-utils = "*"
+alembic = "*"
 
 [dev-packages]
 
