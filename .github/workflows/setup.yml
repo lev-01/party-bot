@@ -29,6 +29,6 @@ jobs:
       - name: Run a multi-line script
         run: |
           sudo apt-get update && sudo apt-get upgrade -y
-          sudo apt-get install python3-pip && pip3 install pipenv
+          sudo apt-get install python3-pip && pip3 install pipenv && sudo apt-get install aiogram sqlalchemy sqlalchemy-utils
           pipenv install --system && pipenv shell
           python3 bot.py
