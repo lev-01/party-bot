@@ -1,8 +1,9 @@
-from launch import dp
+from logic import dp
 from aiogram import types, filters
 from aiogram.dispatcher import FSMContext
-from texts import START_TEXT
-from database import session, User, Food, Alcohol
+from logic.texts import START_TEXT
+from logic.database import session
+from logic.database.models import User, Food, Alcohol
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import func
 
@@ -21,7 +22,6 @@ async def cmd_start(message: types.Message):
     await message.answer(START_TEXT)
     user = User(id=message.from_user.id,
                 name=message.from_user.full_name)
-    print(user.id, user.name)
     check_if_user_exists(message)
 
 

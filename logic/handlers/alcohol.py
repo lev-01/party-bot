@@ -1,10 +1,11 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from launch import dp
-from texts import AVAILABLE_ALCOHOL_CATEGORIES, CHECK_TEXT, HELP_TEXT_ALCOHOL, AVAILABLE_ALCOHOL_MEASUREMENT_UNITS, \
+from logic import dp
+from logic.texts import AVAILABLE_ALCOHOL_CATEGORIES, CHECK_TEXT, HELP_TEXT_ALCOHOL, AVAILABLE_ALCOHOL_MEASUREMENT_UNITS, \
     FINAL_TEXT
-from database import session, Alcohol, User
+from logic.database import session
+from logic.database.models import User, Alcohol
 from .general import check_if_user_exists
 import re
 
