@@ -2,9 +2,4 @@
 .vscode/
 .venv
 __pycache__/
-handlers/__pycache__/
 .env
-database/party.db
-database.ini
-alembic.ini
-migrations/
