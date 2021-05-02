@@ -5,36 +5,43 @@ from sqlalchemy.sql import func
 
 Base = declarative_base()
 
-
 class User(Base):
     __tablename__ = 'user'
 
-    id = Column(Integer, primary_key=True, unique=True, nullable=False, index=True)
-    name = Column(String, index=True)
-    food = relationship('Food', back_populates='user')
-    alcohol = relationship('Alcohol', back_populates='user')
+    id = Column(Integer, primary_key=True, unique=True, nullable=False)
+    first_name = Column(String(50), nullable=False)
+    last_name = Column(String(50), nullable=False)
+
+    choice = relationship('UserChoice', back_populates='user')
 
 
-class Food(Base):
-    __tablename__ = 'food'
+class Category(Base):
+    __tablename__ = 'category'
 
-    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-    user_id = Column(Integer, ForeignKey('user.id'), nullable=False, index=True)
-    chosen_food = Column(String(100), nullable=False)
-    amount = Column(String(50), nullable=False)
-    other = Column(String(250))
-    wishing_time = Column(DateTime(), nullable=False, default=func.now())
+    id = Column(Integer, primary_key=True, unique=True, autoincrement=True, nullable=False)
+    parent_id = Column(Integer, ForeignKey('category.id'))
+    name = Column(String(50), nullable=False)
 
-    user = relationship('User', back_populates='food')
+    item = relationship('Item', back_populates='category')
 
+class Item(Base):
+    __tablename__ = 'item'
 
-class Alcohol(Base):
-    __tablename__ = 'alcohol'
-    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-    user_id = Column(Integer, ForeignKey('user.id'), nullable=False, index=True)
-    chosen_alcohol = Column(String(100), nullable=False)
-    amount = Column(String(50), nullable=False)
-    other = Column(String(250))
-    wishing_time = Column(DateTime(), nullable=False, default=func.now())
+    id = Column(Integer, primary_key=True, unique=True, nullable=False, autoincrement=True)
+    category_id = Column(Integer, ForeignKey('category.id'), nullable=False)
+    name = Column(String(50), nullable=False)
+    amount = Column(String(50))
 
-    user = relationship('User', back_populates='alcohol')
+    category = relationship('Category', back_populates='item')
+    choice = relationship('UserChoice', back_populates='item')
+
+class UserChoice(Base):
+    __tablename__ = 'user_choice'
+
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    item_id = Column(Integer, ForeignKey('item.id'), nullable=False)
+    datetime = Column(DateTime(), nullable=False, default=func.now())
+
+    user = relationship('User', back_populates='choice')
+    item = relationship('Item', back_populates='choice')
