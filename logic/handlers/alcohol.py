@@ -2,9 +2,8 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from logic import dp
-from logic.texts import AVAILABLE_ALCOHOL_CATEGORIES, CHECK_TEXT, HELP_TEXT_ALCOHOL, AVAILABLE_ALCOHOL_MEASUREMENT_UNITS, \
-    FINAL_TEXT
-from logic.database import session
+from logic.texts import AVAILABLE_ALCOHOL_CATEGORIES, CHECK_TEXT, HELP_TEXT_ALCOHOL, AVAILABLE_ALCOHOL_MEASUREMENT_UNITS, FINAL_TEXT
+from logic.database import Session
 from logic.database.models import User, Alcohol
 from .general import check_if_user_exists
 import re
@@ -30,7 +29,6 @@ async def alco_step_1(message: types.Message):
 # step 2
 @dp.message_handler(state=OrderAlcohol.waiting_for_alcohol_category, content_types=types.ContentType.TEXT)
 async def alco_step_2(message: types.Message, state: FSMContext):
-    check_if_user_exists(message)
     if message.text.lower() == '/list':
         await message.answer('Сначала закончи вносить пожелание, потом посмотришь список.')
         await OrderAlcohol.waiting_for_alcohol_category.set()
@@ -47,7 +45,6 @@ async def alco_step_2(message: types.Message, state: FSMContext):
 # step 3
 @dp.message_handler(state=OrderAlcohol.waiting_for_other, content_types=types.ContentType.TEXT)
 async def alco_step_3(message: types.Message, state: FSMContext):
-    check_if_user_exists(message)
     if message.text.lower() in ('/list', '/food'):
         await message.answer('Сначала закончи вносить пожелание, потом сможешь посмотреть список или внести новое пожелание.')
         await OrderAlcohol.waiting_for_other.set()
@@ -70,7 +67,6 @@ async def alco_step_3(message: types.Message, state: FSMContext):
 # step 4
 @dp.message_handler(state=OrderAlcohol.waiting_for_amount, content_types=types.ContentType.TEXT)
 async def alco_step_4(message: types.Message, state: FSMContext):
-    check_if_user_exists(message)
     if message.text.lower() == '/list':
         await message.answer('Сначала закончи вносить пожелание, потом посмотришь список.')
         await OrderAlcohol.waiting_for_amount.set()
@@ -85,16 +81,12 @@ async def alco_step_4(message: types.Message, state: FSMContext):
     await state.update_data(amount=message.text.lower())
 
     user_data = await state.get_data()
-
-    alco = Alcohol(user_id=message.from_user.id,
-                   chosen_alcohol=user_data['chosen_alcohol'],
-                   amount=user_data['amount'],
-                   other=user_data['other']) if 'other' in user_data.keys() else Alcohol(user_id=message.from_user.id,
-                                                                                         chosen_alcohol=user_data[
-                                                                                             'chosen_alcohol'],
-                                                                                         amount=user_data['amount'])
-    session.add(alco)
-    session.commit()
+    with Session.begin() as session:
+        alco = Alcohol(user_id=message.from_user.id,
+                    chosen_alcohol=user_data['chosen_alcohol'],
+                    amount=user_data['amount'],
+                    other=user_data['other'] if 'other' in user_data.keys() else None)
+        session.add(alco)
 
     await message.answer(FINAL_TEXT)
     await state.finish()

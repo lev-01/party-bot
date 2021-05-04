@@ -1,3 +1,3 @@
-from . import general
+from . import common
 from . import food
-from . import alcohol
+# from . import alcohol
